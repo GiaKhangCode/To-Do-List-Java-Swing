@@ -1,7 +1,10 @@
 Database\DBConnection.class
 Model\Task.class
 View\MainFrame.class
+Controller\ToDoListController$2.class
 DatabaseAccess\TaskDAO.class
 Controller\ToDoListController.class
 com\mycompany\todolist\ToDoList.class
 View\MainFrame$1.class
+Controller\ToDoListController$1.class
+Controller\ToDoListController$3.class

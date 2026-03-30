@@ -4,6 +4,8 @@
 
 package com.mycompany.todolist;
 
+import Controller.ToDoListController;
+import DatabaseAccess.TaskDAO;
 import View.MainFrame;
 
 /**
@@ -15,6 +17,9 @@ public class ToDoList {
         // Chạy giao diện trên luồng Event Dispatch Thread của Swing
         javax.swing.SwingUtilities.invokeLater(() -> {
             MainFrame view = new MainFrame();
+            TaskDAO model = new TaskDAO();
+            
+            new ToDoListController(view, model);
             view.setVisible(true);
         });
     }

@@ -30,7 +30,7 @@
                   <Group type="102" attributes="0">
                       <Component id="lableToDoList" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
-                      <Component id="addTaskButton1" min="-2" pref="98" max="-2" attributes="0"/>
+                      <Component id="addTaskButton" min="-2" pref="98" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="updateTaskButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -53,7 +53,7 @@
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="addTaskButton1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="addTaskButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="updateTaskButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="deleteTaskButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -125,7 +125,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="updateTaskButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="addTaskButton1">
+    <Component class="javax.swing.JButton" name="addTaskButton">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="33" green="ff" red="33" type="rgb"/>
@@ -133,7 +133,7 @@
         <Property name="text" type="java.lang.String" value="Th&#xea;m Task"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addTaskButton1ActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addTaskButtonActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="deleteTaskButton">

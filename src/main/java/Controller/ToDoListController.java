@@ -10,49 +10,103 @@ package Controller;
  */
 import DatabaseAccess.TaskDAO;
 import Model.Task;
+import View.MainFrame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 public class ToDoListController {
+    private MainFrame view;
     private TaskDAO dao;
 
-    public ToDoListController() {
-        this.dao = new TaskDAO();
-    }
-
-    public List<Task> loadDataToView() {
-        // 1. Controller yêu cầu Model lấy dữ liệu
-        List<Task> danhSach = dao.getAllTasks();
-        return danhSach;
-    }
-    
-    // Hàm xử lý logic thêm Task
-    public boolean implementCreateTask(String content) {
-        // Có thể thêm logic kiểm tra dữ liệu hợp lệ ở đây trước khi đẩy xuống DB
-        if (content == null || content.trim().isEmpty()) {
-            return false; 
-        }
+    public ToDoListController(MainFrame view, TaskDAO model) {
+        this.view = view;
+        this.dao = model;
         
-        Task newTask = new Task(0, content.trim(), "Chưa thực hiện");
-        return dao.createTask(newTask);
-    }
-    
-    // Xử lý cập nhật trạng thái
-    public boolean implementUpdateStatus(int id, String newStatus) {
-        // Có thể thêm logic kiểm tra dữ liệu ở đây (ví dụ: newStatus không được rỗng)
-        if (newStatus == null || newStatus.trim().isEmpty()) {
-            return false;
-        }
-        return dao.updateStatus(id, newStatus);
+        initListeners();
+        loadDataToView();
     }
 
-    // Xử lý xóa Task
-    public boolean implemetDeleteTask(int id) {
-        // Kiểm tra ID hợp lệ (ID trong Oracle sinh ra thường > 0)
-        if (id <= 0) {
-            return false;
-        }
-        return dao.deleteTask(id);
+    private void initListeners() {
+        // Gắn Listener cho nút Thêm Task
+        this.view.addCreateTaskListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Toàn bộ logic khi bấm nút giờ nằm ở đây!
+                String content = javax.swing.JOptionPane.showInputDialog(view, "Nhập nội dung:");
+                if (content != null && !content.trim().isEmpty()) {
+                    Task newTask = new Task(0, content.trim(), "Chưa thực hiện");
+                    if (dao.createTask(newTask)) {
+                        view.displayNotation("Thành công!", true);
+                        view.displayData(dao.getAllTasks());
+                    } else {
+                        view.displayNotation("Thất bại!", false);
+                    }
+                }
+            }
+        });
+        
+        // --- 2. Lắng nghe nút THAY ĐỔI TRẠNG THÁI (SỬA) ---
+        this.view.addUpdateStatusListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Controller "hỏi" View xem ID nào đang được chọn
+                int taskId = view.getSelectedTaskId();
+                
+                if (taskId == -1) {
+                    view.displayNotation("Vui lòng chọn một công việc để thay đổi trạng thái!", false);
+                    return;
+                }
+
+                String currentStatus = view.getSelectedTaskStatus();
+                String[] options = {"Chưa thực hiện", "Đang thực hiện", "Đã xong"};
+
+                String newStatus = (String) javax.swing.JOptionPane.showInputDialog(
+                        view, "Chọn trạng thái mới:", "Thay đổi trạng thái",
+                        javax.swing.JOptionPane.QUESTION_MESSAGE, null, options, currentStatus
+                );
+
+                if (newStatus != null && !newStatus.equals(currentStatus)) {
+                    if (dao.updateStatus(taskId, newStatus)) {
+                        view.displayNotation("Cập nhật trạng thái thành công!", true);
+                        view.displayData(dao.getAllTasks());
+                    } else {
+                        view.displayNotation("Cập nhật thất bại!", false);
+                    }
+                }
+            }
+        });
+
+        // --- 3. Lắng nghe nút XÓA TASK ---
+        this.view.addDeleteTaskListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int taskId = view.getSelectedTaskId();
+                
+                if (taskId == -1) {
+                    view.displayNotation("Vui lòng chọn một công việc cần xóa!", false);
+                    return;
+                }
+
+                int confirm = javax.swing.JOptionPane.showConfirmDialog(
+                        view, "Bạn có chắc chắn muốn xóa công việc này không?", "Xác nhận xóa",
+                        javax.swing.JOptionPane.YES_NO_OPTION
+                );
+
+                if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+                    if (dao.deleteTask(taskId)) {
+                        view.displayNotation("Xóa thành công!", true);
+                        view.displayData(dao.getAllTasks());
+                    } else {
+                        view.displayNotation("Xóa thất bại!", false);
+                    }
+                }
+            }
+        });
     }
-    
-    
+
+    public void loadDataToView() {
+        List<Task> danhSachMoi = dao.getAllTasks();
+        view.displayData(danhSachMoi);
+    }
 }

@@ -16,18 +16,44 @@ import java.util.List;
 public class MainFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
-    private ToDoListController controller;
     
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
-        
-        controller = new ToDoListController();
-        refreshTable();
     }
 
+    public void addCreateTaskListener(java.awt.event.ActionListener listener) {
+        addTaskButton.addActionListener(listener); 
+    }
+
+    // Mở cổng cho nút "Thay đổi trạng thái"
+    public void addUpdateStatusListener(java.awt.event.ActionListener listener) {
+        updateTaskButton.addActionListener(listener);
+    }
+    
+    public void addDeleteTaskListener(java.awt.event.ActionListener listener) {
+        deleteTaskButton.addActionListener(listener);
+    }
+    
+    // 2. CÁC HÀM HỖ TRỢ ĐỂ CONTROLLER LẤY DỮ LIỆU ĐANG CHỌN TRÊN BẢNG
+    public int getSelectedTaskId() {
+        int selectedRow = taskTable.getSelectedRow();
+        if (selectedRow != -1) {
+            return (int) taskTable.getValueAt(selectedRow, 0); // Cột 0 là ID
+        }
+        return -1; // Trả về -1 nếu người dùng chưa chọn dòng nào
+    }
+
+    public String getSelectedTaskStatus() {
+        int selectedRow = taskTable.getSelectedRow();
+        if (selectedRow != -1) {
+            return (String) taskTable.getValueAt(selectedRow, 2); // Cột 2 là Status
+        }
+        return null;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -41,7 +67,7 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         taskTable = new javax.swing.JTable();
         updateTaskButton = new javax.swing.JButton();
-        addTaskButton1 = new javax.swing.JButton();
+        addTaskButton = new javax.swing.JButton();
         deleteTaskButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -78,9 +104,9 @@ public class MainFrame extends javax.swing.JFrame {
         updateTaskButton.setText("Thay đổi trạng thái");
         updateTaskButton.addActionListener(this::updateTaskButtonActionPerformed);
 
-        addTaskButton1.setBackground(new java.awt.Color(51, 255, 51));
-        addTaskButton1.setText("Thêm Task");
-        addTaskButton1.addActionListener(this::addTaskButton1ActionPerformed);
+        addTaskButton.setBackground(new java.awt.Color(51, 255, 51));
+        addTaskButton.setText("Thêm Task");
+        addTaskButton.addActionListener(this::addTaskButtonActionPerformed);
 
         deleteTaskButton.setBackground(new java.awt.Color(255, 51, 0));
         deleteTaskButton.setForeground(new java.awt.Color(242, 242, 242));
@@ -98,7 +124,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lableToDoList)
                         .addGap(12, 12, 12)
-                        .addComponent(addTaskButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(addTaskButton, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(updateTaskButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -116,7 +142,7 @@ public class MainFrame extends javax.swing.JFrame {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(addTaskButton1)
+                            .addComponent(addTaskButton)
                             .addComponent(updateTaskButton)
                             .addComponent(deleteTaskButton))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -128,99 +154,15 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void updateTaskButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateTaskButtonActionPerformed
-        // 1. Lấy vị trí dòng đang được chọn trên bảng
-        int selectedRow = taskTable.getSelectedRow();
 
-        // 2. Kiểm tra xem người dùng đã chọn dòng nào chưa (-1 nghĩa là chưa chọn)
-        if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng chọn một công việc trong bảng để thay đổi trạng thái!", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
-            return; // Dừng hàm lại, không chạy tiếp
-        }
-
-        // 3. Lấy ID và Trạng thái hiện tại của công việc đang chọn (Cột ID là cột 0, Cột Status là cột 2)
-        int taskId = (int) taskTable.getValueAt(selectedRow, 0);
-        String currentStatus = (String) taskTable.getValueAt(selectedRow, 2);
-
-        // 4. Tạo danh sách các trạng thái hợp lệ (dựa trên ràng buộc CHECK trong DB của bạn)
-        String[] options = {"Chưa thực hiện", "Đang thực hiện", "Đã xong"};
-
-        // 5. Hiển thị hộp thoại Dropdown để người dùng chọn trạng thái mới
-        String newStatus = (String) javax.swing.JOptionPane.showInputDialog(
-                this,
-                "Chọn trạng thái mới:",
-                "Thay đổi trạng thái",
-                javax.swing.JOptionPane.QUESTION_MESSAGE,
-                null, // Không dùng icon tùy chỉnh
-                options, // Danh sách lựa chọn
-                currentStatus // Giá trị mặc định hiển thị sẵn
-        );
-
-        // 6. Kiểm tra nếu người dùng đã chọn trạng thái mới (không bấm Cancel) và trạng thái đó khác trạng thái cũ
-        if (newStatus != null && !newStatus.equals(currentStatus)) {
-            
-            boolean isSuccess = controller.implementUpdateStatus(taskId, newStatus);
-
-            if (isSuccess) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Cập nhật trạng thái thành công!");
-                
-                // 8. Tải lại dữ liệu lên bảng
-                refreshTable();
-            } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Vui lòng thử lại!", "Lỗi", javax.swing.JOptionPane.ERROR_MESSAGE);
-            }
-        }
     }//GEN-LAST:event_updateTaskButtonActionPerformed
 
-    private void addTaskButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTaskButton1ActionPerformed
-        // 1. Hiển thị hộp thoại yêu cầu người dùng nhập nội dung công việc
-        String content = javax.swing.JOptionPane.showInputDialog(
-                this, 
-                "Nhập nội dung công việc mới:", 
-                "Thêm Task", 
-                javax.swing.JOptionPane.QUESTION_MESSAGE
-        );
-
-        // 2. Kiểm tra xem người dùng có nhập dữ liệu không (tránh trường hợp bấm Cancel hoặc để trống)
-        if (content != null && !content.trim().isEmpty()) {
-
-            // 4. Khởi tạo DAO và gọi hàm thêm vào Database
-            // (Giả sử bạn đã viết file TaskDAO như hướng dẫn trước đó)
-            boolean isSuccess = controller.implementCreateTask(content.trim());
-
-            if (isSuccess) {
-                javax.swing.JOptionPane.showMessageDialog(this, "Thêm công việc thành công!");
-                
-                // 5. Cập nhật lại dữ liệu trên JTable
-                refreshTable();
-            } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Thêm thất bại. Vui lòng kiểm tra lại!", "Lỗi", javax.swing.JOptionPane.ERROR_MESSAGE);
-            }
-        }        // TODO add your handling code here:
-    }//GEN-LAST:event_addTaskButton1ActionPerformed
+    private void addTaskButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addTaskButtonActionPerformed
+               // TODO add your handling code here:
+    }//GEN-LAST:event_addTaskButtonActionPerformed
 
     private void deleteTaskButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteTaskButtonActionPerformed
-        // 1. Hiển thị hộp thoại yêu cầu người dùng nhập nội dung công việc
-        int selectedRow = taskTable.getSelectedRow();
-        
-        // 2. Kiểm tra xem người dùng đã chọn dòng nào chưa (-1 nghĩa là chưa chọn)
-        if (selectedRow == -1) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Vui lòng chọn một công việc trong bảng để thay đổi trạng thái!", "Thông báo", javax.swing.JOptionPane.WARNING_MESSAGE);
-            return; // Dừng hàm lại, không chạy tiếp
-        }
-        
-        // 3. Lấy ID và Trạng thái hiện tại của công việc đang chọn (Cột ID là cột 0, Cột Status là cột 2)
-        int taskId = (int) taskTable.getValueAt(selectedRow, 0);
-        
-        boolean isSuccess = controller.implemetDeleteTask(taskId);
-
-        if (isSuccess) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Xoá công việc thành công!");
-                
-            // 5. Cập nhật lại dữ liệu trên JTable
-            refreshTable();
-        } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "Xoá thất bại. Vui lòng kiểm tra lại!", "Lỗi", javax.swing.JOptionPane.ERROR_MESSAGE);            
-        }     // TODO add your handling code here:        // TODO add your handling code here:
+            // TODO add your handling code here:        // TODO add your handling code here:
     }//GEN-LAST:event_deleteTaskButtonActionPerformed
 
     /**
@@ -269,13 +211,17 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
     
-    public void refreshTable() {
-        List<Task> danhSach = controller.loadDataToView();
-        displayData(danhSach);
+    // Thêm một hàm tiện ích để Controller tiện gọi thông báo
+    public void displayNotation(String thongBao, boolean laThanhCong) {
+        if (laThanhCong) {
+            javax.swing.JOptionPane.showMessageDialog(this, thongBao);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, thongBao, "Lỗi", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton addTaskButton1;
+    private javax.swing.JButton addTaskButton;
     private javax.swing.JButton deleteTaskButton;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lableToDoList;
