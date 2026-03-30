@@ -1,0 +1,7 @@
+Database\DBConnection.class
+Model\Task.class
+View\MainFrame.class
+DatabaseAccess\TaskDAO.class
+Controller\ToDoListController.class
+com\mycompany\todolist\ToDoList.class
+View\MainFrame$1.class
